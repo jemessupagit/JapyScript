@@ -1,6 +1,6 @@
 # Japy Script Language Specification
 
-> ⚠️ **Under development** — Test Version v1.0.2-beta. Features may change, and some parts are not finished yet (see [Current Status & Roadmap](#-9-current-status--roadmap)).
+> ⚠️ **Under development** — Test Version v1.0.3-beta. Features may change, and some parts are not finished yet (see [Current Status & Roadmap](#-9-current-status--roadmap)).
 
 This document details the core syntax rules, design philosophies, and architectural layers for **Japy Script**—a mobile-first, lightweight scripting language engineered as the primary logic driving system for a modern 2D/3D Universal Game Engine.
 
@@ -40,7 +40,30 @@ def loop() {
 }
 ```
 
-> **Note:** `setup()` runs automatically once, after the whole script has loaded. The per-frame `loop()` is on the roadmap and is **not executed by the interpreter yet**.
+> **Note:** `setup()` runs automatically once, after the whole script has loaded. Then `loop()` runs once per frame (see [Running a Script](#️-8-running-a-script)). Inside `loop()`, the built-in variable `frame` holds the current frame number, starting at 1.
+
+### Functions with Parameters and Return Values
+Functions can take parameters and give a value back with `return`:
+```javascript
+def add(a, b) {
+    return a + b
+}
+
+def factorial(n) {
+    if (n <= 1) {
+        return 1
+    }
+    return n * factorial(n - 1)
+}
+
+var total = add(3, 4)        # 7
+print(factorial(5))          # 120
+```
+- Parameters and variables declared with `var` inside a function are **local** to that call.
+- Assigning to an existing global variable inside a function (`score = score + 1`) updates the global.
+- Calling a function with the wrong number of arguments is an error.
+- A function without `return` gives back `null`.
+- Recursion is limited to 100 nested calls to protect against infinite recursion.
 
 ---
 
@@ -153,7 +176,7 @@ while (i < 5) {
 - **Comments** start with `#` and run to the end of the line.
 - **One statement per line.** No semicolons needed. A line may continue after an operator or inside `( )`.
 - **Blocks** are always wrapped in `{ }`. Indentation never matters.
-- **Calling your own function:** `reset()` runs the function `def reset() { ... }`.
+- **Calling your own function:** `reset()` runs `def reset() { ... }`, and `add(3, 4)` passes arguments (see section 2).
 
 ---
 
@@ -164,23 +187,28 @@ Japy Script runs on a Python-based interpreter. Run any `.japy` file with:
 ```
 python main.py examples/01_hero_walk.japy
 python main.py examples/02_logic.japy
+python main.py examples/03_functions.japy --frames 4
 ```
 
-Execution order: top-level statements run from top to bottom, then `setup()` runs once if it is defined.
+Execution order:
+1. Top-level statements run from top to bottom.
+2. `setup()` runs once, if it is defined.
+3. `loop()` runs once per frame (about 60 frames per second), if it is defined.
+
+By default `loop()` runs **60 frames** (about one second). Use `--frames N` to choose how many, or `--frames 0` to run until you press Ctrl+C.
 
 ---
 
 ## 🚧 9. Current Status & Roadmap
 
-**Working now (v1.0.2-beta)**
-- `var`, re-assignment, `def`, `if` / `else if` / `else`, `while`
+**Working now (v1.0.3-beta)**
+- `var`, re-assignment, `def` with parameters, `return`, local variables, recursion
+- `if` / `else if` / `else`, `while`
 - Arithmetic, comparison and logic operators, text joining
 - Custom API calls such as `print(...)` and plugin calls such as `plugin.method(a, b)`
-- `#` comments, automatic `setup()`
+- `#` comments, automatic `setup()`, per-frame `loop()` with the `frame` variable
 
 **Planned**
-- Per-frame `loop()` execution
-- Function parameters and `return` values
 - `for` loops, lists/arrays, `break` / `continue`
-- Variable scopes inside functions
+- Real-time frame timing tied to a real renderer
 - Real native bindings for the 3D / physics / mobile UI plugins (they currently print what they would do)
