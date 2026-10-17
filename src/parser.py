@@ -30,6 +30,9 @@ class LiteralNode(ASTNode):
     def __init__(self, value):
         self.value = value
 
+# Token types that carry no meaning for the parser
+SKIP_TYPES = ('NEWLINE', 'COMMENT')
+
 class JapyParser:
     def __init__(self, tokens):
         self.tokens = tokens
@@ -49,15 +52,25 @@ class JapyParser:
         self.pos += 1
         return token
 
+    def skip_newlines(self):
+        while self.peek() is not None and self.peek().type in SKIP_TYPES:
+            self.pos += 1
+
     def parse(self):
         statements = []
-        while self.peek() is not None:
+        while True:
+            self.skip_newlines()
+            if self.peek() is None or self.peek().type == 'EOF':
+                break
             statements.append(self.parse_statement())
         return ProgramNode(statements)
 
     def parse_statement(self):
+        self.skip_newlines()
         token = self.peek()
-        
+        if token is None:
+            raise SyntaxError("Unexpected end of script")
+
         # 1. Parse variable declaration: var name = value
         if token.type == 'VAR':
             self.consume('VAR')
@@ -65,65 +78,83 @@ class JapyParser:
             self.consume('ASSIGN')
             value_node = self.parse_expression()
             return VarDeclNode(name_token.value, value_node)
-            
+
         # 2. Parse function definition: def name() { ... }
         elif token.type == 'DEF':
             self.consume('DEF')
             name_token = self.consume('ID')
             self.consume('LPAREN')
             self.consume('RPAREN')
+            self.skip_newlines()
             self.consume('LBRACE')
-            
-            # Safe block parsing: collects inside curly braces ignoring layout
+
+            # Block parsing: collect statements inside curly braces, ignoring layout
             body = []
-            while self.peek() and self.peek().type != 'RBRACE':
+            while True:
+                self.skip_newlines()
+                nxt = self.peek()
+                if nxt is None:
+                    raise SyntaxError("Missing closing brace '}' for function " + name_token.value)
+                if nxt.type == 'RBRACE':
+                    break
                 body.append(self.parse_statement())
             self.consume('RBRACE')
             return FuncDefNode(name_token.value, body)
-            
-        # 3. Default to parsing expression statements (e.g., API calls or assignments)
+
+        # 3. Default to parsing expression statements (e.g., API calls)
         return self.parse_expression()
 
+    def parse_args(self):
+        """Parse call arguments after '(' up to and including ')'."""
+        args = []
+        self.skip_newlines()
+        if self.peek() is not None and self.peek().type != 'RPAREN':
+            args.append(self.parse_expression())
+            self.skip_newlines()
+            while self.peek() is not None and self.peek().type == 'COMMA':
+                self.consume('COMMA')
+                self.skip_newlines()
+                args.append(self.parse_expression())
+                self.skip_newlines()
+        self.consume('RPAREN')
+        return args
+
     def parse_expression(self):
+        self.skip_newlines()
         token = self.consume()
-        
+
+        # Negative number literal: -5, -0.25
+        if token.type == 'OP' and token.value == '-':
+            num = self.consume('NUMBER')
+            v = num.value
+            return LiteralNode('-' + v if isinstance(v, str) else -v)
+
         if token.type in ['NUMBER', 'STRING']:
             return LiteralNode(token.value)
-            
+
         elif token.type == 'ID':
             next_token = self.peek()
-            
-            # Parse standalone API Call: print("hello")
+
+            # Standalone API call: print("hello")
             if next_token and next_token.type == 'LPAREN':
                 self.consume('LPAREN')
-                args = []
-                if self.peek().type != 'RPAREN':
-                    args.append(self.parse_expression())
-                    while self.peek().type == 'COMMA':
-                        self.consume('COMMA')
-                        args.append(self.parse_expression())
-                self.consume('RPAREN')
+                args = self.parse_args()
                 return CallNode(token.value, args)
-                
-            # Parse Plugin Property/Method Access: plugin.setboneweight(x, y)
+
+            # Plugin property/method access: plugin.setboneweight(x, y)
             elif next_token and next_token.type == 'DOT':
                 self.consume('DOT')
                 prop_token = self.consume('ID')
-                
-                # Check if it's a method call with arguments
+
                 if self.peek() and self.peek().type == 'LPAREN':
                     self.consume('LPAREN')
-                    args = []
-                    if self.peek().type != 'RPAREN':
-                        args.append(self.parse_expression())
-                        while self.peek().type == 'COMMA':
-                            self.consume('COMMA')
-                            args.append(self.parse_expression())
-                    self.consume('RPAREN')
+                    args = self.parse_args()
                     return PropertyAccessNode(token.value, prop_token.value, args)
-                
+
                 return PropertyAccessNode(token.value, prop_token.value)
-                
+
             return LiteralNode(token.value)
-            
-        raise SyntaxError(f"Invalid expression syntax near: {token.value}")
+
+        raise SyntaxError(
+            f"Invalid expression near: type={token.type} value={token.value!r}"
+        )
