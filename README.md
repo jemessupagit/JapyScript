@@ -1,5 +1,10 @@
 > ⚠️ **Under development** — Test Version v1.0.0 (beta)
 > Features may change, and some parts are not finished yet.
+## How to run
+```
+python main.py examples/01_hero_walk.japy
+```
+Requires Python 3.8+. Tested on Termux (Android).
 
 # Japy Script Engine 🐍 + 🟨
 
