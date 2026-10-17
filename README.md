@@ -5,9 +5,6 @@
 python main.py examples/01_hero_walk.japy
 ```
 ```
-python main.py examples/01_hero_walk.japy
-```
-```
 python main.py examples/02_logic.japy
 ```
 Requires Python 3.8+. Tested on Termux (Android).
