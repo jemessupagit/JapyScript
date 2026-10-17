@@ -1,0 +1,16 @@
+# First ever Japy Script for 3D Game Engine Locomotion
+# Testing mobile-friendly syntax with no semicolons and safe braces
+
+var initial_speed = 5
+
+def setup() {
+    # Load 3D advanced animation plugin from the engine
+    engineloadplugin("Advanced3DAnim")
+    
+    # Target our hero object node
+    var hero = "PlayerNode"
+    
+    # 200,000+ custom APIs can be triggered via dot notation seamlessly
+    # Even if indentation is messy on mobile screens, curly braces protect the code
+    print("Japy Script successfully initialized inside the game engine")
+}
