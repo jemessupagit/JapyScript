@@ -1,3 +1,5 @@
+**Currently, the beta version is only compatible with web browser engines such as HTML5 (you can just write index.html). It is not yet compatible with larger web engines.**
+
 > ⚠️ **Under development** — Test Version v1.0.0 (beta)
 > Features may change, and some parts are not finished yet.
 ## How to run
