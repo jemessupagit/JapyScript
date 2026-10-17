@@ -25,7 +25,7 @@ Coding on mobile screens is often frustrating due to limited keyboard real estat
 ## ⚙️ Sprawling Architecture & High Scale APIs
 Japy Script acts as the native scripting engine that binds to high-performance C++ rendering layers. It is built to comfortably manage:
 - **100+ Core Keywords** for fluent syntax declarations.
-- **200,000 to 300,000+ Custom Plugin APIs** split across dedicated families (`japy3D_`, `japy2D_`, `japyPhysics_`, `japyUI_`) to seamlessly trigger physics simulations, spatial sound, mobile screen touch inputs, and 3D character locomotion without namespace collisions.
+- **200,000 to 300,000+ Custom Plugin APIs (planned) ** split across dedicated families (`japy3D_`, `japy2D_`, `japyPhysics_`, `japyUI_`) to seamlessly trigger physics simulations, spatial sound, mobile screen touch inputs, and 3D character locomotion without namespace collisions.
 
 ---
 
