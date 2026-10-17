@@ -1,3 +1,6 @@
+> ⚠️ **Under development** — Test Version v1.0.0 (beta)
+> Features may change, and some parts are not finished yet.
+
 # Japy Script Engine 🐍 + 🟨
 
 **Japy Script** is a revolutionary, lightweight, and hybrid programming language designed specifically for developing 2D/3D games on **mobile smartphones**. By seamlessly uniting the clean readability of **Python** with the flexible dynamic architecture of **JavaScript**, Japy Script eliminates the physical pain points of writing code on tiny touchscreens.
