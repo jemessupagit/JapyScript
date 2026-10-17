@@ -13,25 +13,26 @@ class JapyLexer:
         # Core specs to scan 100+ Keywords and 300,000+ Custom APIs
         # Strictly follows Japy philosophy: ignores mobile indentation, catches braces
         self.token_specs = [
-            ('COMMENT',    r'#[^\n]*'),              # English comments using #
-            ('VAR',        r'\bvar\b'),               # Variable declaration keyword
-            ('DEF',        r'\bdef\b'),               # Function declaration keyword
-            ('IF',         r'\bif\b'),                # Conditional if
-            ('ELSE',       r'\belse\b'),              # Fallback else
-            ('NUMBER',     r'\d+(\.\d+)?'),           # Coordinates, scales, physics vectors
-            ('STRING',     r'\"[^\"]*\"|\'[^\']*\''), # Text or game asset file paths
-            ('ID',         r'[a-zA-Z_][a-zA-Z0-9_]*'),# For 100+ keywords & 300,000+ custom APIs
-            ('LBRACE',     r'\{'),                    # Block opening brace (Safety)
-            ('RBRACE',     r'\}'),                    # Block closing brace (Safety)
-            ('LPAREN',     r'\('),                    # Parameters open
-            ('RPAREN',     r'\)'),                    # Parameters close
-            ('ASSIGN',     r'='),                     # Value assignment
-            ('OP',         r'[+\-*/<>!&|]+'),          # Math & logic operators
-            ('COMMA',      r','),                     # Separator for parameters
-            ('DOT',        r'\.'),                    # Accessor for sub-properties/plugins
-            ('SKIP',       r'[ \t]+'),                # Spaces (Ignored for mobile typing safety)
-            ('NEWLINE',    r'\n'),                    # Line breaks
-            ('MISMATCH',   r'.'),                     # Catches syntax errors
+            ('COMMENT',    r'#[^\n]*'),               # English comments using #
+            ('VAR',        r'\bvar\b'),                # Variable declaration keyword
+            ('DEF',        r'\bdef\b'),                # Function declaration keyword
+            ('IF',         r'\bif\b'),                 # Conditional if
+            ('ELSE',       r'\belse\b'),               # Fallback else
+            ('WHILE',      r'\bwhile\b'),              # Loop while condition is true
+            ('NUMBER',     r'\d+(\.\d+)?'),            # Coordinates, scales, physics vectors
+            ('STRING',     r'\"[^\"]*\"|\'[^\']*\''),  # Text or game asset file paths
+            ('ID',         r'[a-zA-Z_][a-zA-Z0-9_]*'), # For 100+ keywords & 300,000+ custom APIs
+            ('LBRACE',     r'\{'),                     # Block opening brace (Safety)
+            ('RBRACE',     r'\}'),                     # Block closing brace (Safety)
+            ('LPAREN',     r'\('),                     # Parameters open
+            ('RPAREN',     r'\)'),                     # Parameters close
+            ('OP',         r'==|!=|<=|>=|&&|\|\||[+\-*/%<>!]'),  # Math & logic operators
+            ('ASSIGN',     r'='),                      # Value assignment
+            ('COMMA',      r','),                      # Separator for parameters
+            ('DOT',        r'\.'),                     # Accessor for sub-properties/plugins
+            ('SKIP',       r'[ \t\r]+'),               # Spaces (Ignored for mobile typing safety)
+            ('NEWLINE',    r'\n'),                     # Line breaks
+            ('MISMATCH',   r'.'),                      # Catches syntax errors
         ]
         self.regex = re.compile('|'.join(f'(?P<{name}>{pattern})' for name, pattern in self.token_specs))
 
@@ -40,11 +41,11 @@ class JapyLexer:
         for match in self.regex.finditer(source_code):
             kind = match.lastgroup
             value = match.group(kind)
-            
+
             if kind == 'SKIP' or kind == 'COMMENT':
                 continue
             elif kind == 'MISMATCH':
                 raise SyntaxError(f"Unexpected character on mobile input: {value}")
-            
+
             tokens.append(JapyToken(kind, value))
         return tokens

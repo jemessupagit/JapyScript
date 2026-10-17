@@ -1,16 +1,27 @@
-# First ever Japy Script for 3D Game Engine Locomotion
-# Testing mobile-friendly syntax with no semicolons and safe braces
+# Advanced Japy Script Showcase: 3D Model, Physics, and Mobile UI Integration
+# Designed to be typed effortlessly on smartphone screens
 
-var initial_speed = 5
+var base_gravity = 9.81
+var spawn_x = 0
+var spawn_y = 5
+var spawn_z = -10
 
 def setup() {
-    # Load 3D advanced animation plugin from the engine
+    # 1. Attach native C++ animation and simulation engine plugins
     engineloadplugin("Advanced3DAnim")
+    engineloadplugin("JapyNativePhysics")
     
-    # Target our hero object node
-    var hero = "PlayerNode"
+    # 2. Configure global engine physics settings via simple Japy APIs
+    japyPhysics_setGravity(base_gravity)
     
-    # 200,000+ custom APIs can be triggered via dot notation seamlessly
-    # Even if indentation is messy on mobile screens, curly braces protect the code
-    print("Japy Script successfully initialized inside the game engine")
+    # 3. Load 3D model meshes and assets into the active engine layout
+    japy3D_spawnMesh("assets/models/character_hero.fbx")
+    japy3D_createCube(spawn_x, spawn_y, spawn_z)
+    japy3D_setCamera("ThirdPerson_Follow")
+    
+    # 4. Inject virtual touch inputs directly onto the mobile touchscreen viewport
+    japyUI_createVirtualJoystick("left")
+    japyUI_addButton("Jump", 80, 20)
+    
+    print("Mobile UI, Physics Matrix, and 3D Assets completely initialized via Japy Script")
 }
