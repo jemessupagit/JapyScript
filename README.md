@@ -1,71 +1,74 @@
-**Currently, the beta version is only compatible with web browser engines such as HTML5 (you can just write index.html). It is not yet compatible with larger game engines.**
-
-> ⚠️ **Under development** — Test Version v1.0.0 (beta)
-> Features may change, and some parts are not finished yet.
-## How to run
-```
-python main.py examples/01_hero_walk.japy
-```
-```
-python main.py examples/02_logic.japy
-```
-Requires Python 3.8+. Tested on Termux (Android).
+> ⚠️ **Under development** — Test Version v1.5.0 (beta)
+> Features may change, and some parts are not finished yet. See [CHANGELOG.md](CHANGELOG.md).
 
 # Japy Script Engine 🐍 + 🟨
 
-**Japy Script** is a revolutionary, lightweight, and hybrid programming language designed specifically for developing 2D/3D games on **mobile smartphones**. By seamlessly uniting the clean readability of **Python** with the flexible dynamic architecture of **JavaScript**, Japy Script eliminates the physical pain points of writing code on tiny touchscreens.
+**Japy Script** is a lightweight, hybrid scripting language for making 2D/3D games on **mobile phones**.
+It mixes the readability of **Python** with the braces of **JavaScript**, so it is comfortable to type on a touchscreen.
 
----
-
-## 📱 The Mobile-First Programming Philosophy
-Coding on mobile screens is often frustrating due to limited keyboard real estate and complex text formatting. Japy Script solves this by implementing two core language rules:
-- **No Semicolons (Python DNA):** Zero mandatory trailing semicolons (`;`). This drastically reduces the need to constantly flip between the alphabetical and symbol pages on virtual mobile keyboards.
-- **Indentation Shield (JavaScript DNA):** The language completely ignores strict spacing or code alignment. Instead, it relies on strict curly braces `{ }` for block scoping. Your game logic will run perfectly 100% of the time, even if your code layout becomes messy or misaligned while typing on a touchscreen.
-
----
-
-## ⚙️ Sprawling Architecture & High Scale APIs
-Japy Script acts as the native scripting engine that binds to high-performance C++ rendering layers. It is built to comfortably manage:
-- **100+ Core Keywords** for fluent syntax declarations.
-- **200,000 to 300,000+ Custom Plugin APIs (planned) ** split across dedicated families (`japy3D_`, `japy2D_`, `japyPhysics_`, `japyUI_`) to seamlessly trigger physics simulations, spatial sound, mobile screen touch inputs, and 3D character locomotion without namespace collisions.
-
----
-
-## 📦 Project Ecosystem Setup
-The engine files are organized inside the local storage repository as follows:
-```text
-JapyScript/
-├── docs/            # Complete syntax specifications (syntax.md)
-├── examples/        # Ready-to-run Japy script showcases (.japy)
-├── src/             # The core Python runtime engine (lexer, parser, interpreter, api_db)
-├── main.py          # The master runtime ignition trigger
-├── LICENSE          # Open-source legal safety framework (MIT License)
-└── README.md        # Project index landing page (This file)
+## How to run
 ```
+python main.py examples/01_hero_walk.japy      # run a script
+python main.py                                 # interactive prompt (REPL)
+python main.py -c 'print(1 + 2)'               # run one line
+python main.py examples/06_game_loop.japy --frames 5
+python main.py --check script.japy             # syntax check only
+python main.py --list-apis                     # every built-in command
+python -m unittest discover -s tests           # run the tests
+```
+Requires **Python 3.8 or newer** (the code is checked against 3.8 syntax). Tested on Python 3.12 and Termux (Android).
 
----
+## Mobile-first rules
+- **No semicolons needed** (a `;` is allowed but ignored).
+- **Indentation Shield:** blocks use `{ }`, so messy spacing on a phone never changes what your code does.
+- Long calls can be split over several lines inside `( )` and `[ ]`.
 
-## 💻 Quick Code Demonstration
-A clean look at how Japy Script controls advanced 3D mechanics and mobile viewports smoothly:
-
+## A taste of v1.5.0
 ```javascript
-# Advanced Japy Script Showcase: 3D Model, Physics, and Mobile UI Integration
-var base_gravity = 9.81
-var spawn_x = 0
+const GRAVITY = 9.81
+var player = { name: "Hero", hp: 100, items: ["sword"] }
+
+def damage(target, amount = 10) {
+    target.hp -= amount
+    if target.hp <= 0 { throw target.name + " was defeated" }
+}
 
 def setup() {
-    engineloadplugin("Advanced3DAnim")
-    engineloadplugin("JapyNativePhysics")
-    
-    japyPhysics_setGravity(base_gravity)
-    japy3D_spawnMesh("assets/models/character_hero.fbx")
-    japyUI_createVirtualJoystick("left")
-    
-    print("Mobile UI, Physics Matrix, and 3D Assets initialized!")
+    japyPhysics_setGravity(GRAVITY)
+    player.items.push("shield")
+    for i, item in enumerate(player.items) {
+        print((i + 1) + ". " + item)
+    }
+}
+
+def loop() {
+    try { damage(player, 30) } catch (msg) { print(msg) }
+    print("hp: " + player.hp)
 }
 ```
+`setup()` runs once, then `loop()` runs once per frame (`--frames N` to repeat).
 
----
+## What is inside
+```text
+JapyScript/
+├── main.py          # command line runner + interactive prompt
+├── src/japy/        # the engine: lexer, parser, interpreter, stdlib, api_db
+├── examples/        # ready-to-run .japy scripts (01 - 08, plus lib/)
+├── docs/            # syntax.md (language guide) and api.md (all commands)
+├── tests/           # unittest suite
+├── tools/           # gen_api_doc.py regenerates docs/api.md
+├── CHANGELOG.md
+└── LICENSE          # MIT
+```
 
-## 📄 Licensing & Open Source
+## Commands and the game engine
+**169 commands and constants** are available today (`python main.py --list-apis`, or see [docs/api.md](docs/api.md)):
+core helpers for math, text, lists, dicts, JSON and time, plus game API families `japy3D_`, `japy2D_`,
+`japyPhysics_`, `japyUI_`, `japyAudio_`, `japyInput_`, `japyScene_`, `japyNet_` and `japySave_`.
+
+The game APIs are **simulated**: each prints what a real engine would do, so you can design and test game logic
+before the native C++ rendering layer exists. The long-term goal is 100+ keywords and a very large plugin API
+library; a native back end replaces a simulated command by registering a function with the same name.
+
+## Licensing & Open Source
 This project is open for worldwide collaboration under the **MIT License**. Created and copyrighted by **James**.
